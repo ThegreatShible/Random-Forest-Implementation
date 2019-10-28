@@ -22,3 +22,18 @@ Quelques références à titre indicatif que vous compléterez à votre guise et
 ##### Régression ou Catégorisation ?
 
 ### RandomForest
+
+## entropy ####
+exemple avec le dataset myocarde :
+
+myocarde=read.table("http://freakonometrics.free.fr/myocarde.csv", head=TRUE, sep=";")
+y=myocarde$PRONO classe=(myocarde[,3]< 19)
+
+entropy <-  function(y,classe){
+  T. = table(y,classe)
+  nx = apply(T.,2,sum)
+  n. = sum(T.)
+  pxy = T./matrix(rep(nx,each=2),nrow=2)
+  omega = matrix(rep(nx,each=2),nrow=2)/n
+  g  = sum(omega*pxy*log(pxy))
+  return(g)}
