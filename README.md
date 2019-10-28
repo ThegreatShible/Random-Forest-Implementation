@@ -10,3 +10,15 @@ Ce projet consiste en l’étude approdondie des arbres de décision et de leur 
 * Montrer aux travers d’expériences la supériorité des forêts aléatoires sur les arbres de décision permettant ainsi de valider empiriquement les propriétés théoriques discutés en cours sur les méthodes de ré-échantillonage.
 
 Quelques références à titre indicatif que vous compléterez à votre guise et selon les besoins de votre projet : [Breiman, 2001, Rokach, 2010, Breiman, 1996].
+
+## Organisation
+
+### Arbres décisionnels
+
+#### ArbreGeneration
+
+#### DivisionAttribut
+
+##### Régression ou Catégorisation ?
+
+### RandomForest
