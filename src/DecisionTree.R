@@ -54,6 +54,43 @@ divideDataset <- function(X, values, attribute=1) {
   return(res)
 }
 
+# Takes 2 vectors, sorts the first one and applies the same
+# sorting to the second one
+orderVectorByOther <- function(x, Y) {
+  x = cbind(x, (1:length(x)))
+  x = x[order(x[,1]),]
+  Y=Y[x[,2]]
+  return(Y)
+}
+
+
+separations <- function(X, n=2) {
+  len = length(X)
+  last = X[1]
+  res = list()
+  count=0
+  if (n > 1) {
+    for (i in 2:length(X)) {
+      if (X[i] != last) {
+        last = X[i]
+        if (n==2) {
+          count = count + 1
+          res[[count]] = i
+        }
+        else {
+          subSep = separations(X[i:len], n=n-1)
+          for (s in subSep) {
+            count = count+1
+            res[[count]] = c(i,s+i-1)
+          }
+        }
+      }
+    }
+  }
+  return(res)
+}
+
+
 attributeDivision <- function(X) {
   minE = double.xmax
   j = list(attribute=NA, value=NA)
@@ -71,7 +108,8 @@ attributeDivision <- function(X) {
     # QUANTITATIVE
     else {
       # Every way to separate a dataset
-      for (sep in separations(X, attribute)) {
+      orderedY = orderVectorByOther(X[,attr], Y)
+      for (sep in separations(orderedY)) {
         separated = divideDataset(X, sep)
         lenSep = length(separated)
         E = 0
