@@ -101,14 +101,14 @@ separations <- function(X, n=2) {
 }
 
 
-attributeDivision <- function(X) {
-  minE = double.xmax
+attributeDivision <- function(X, Y) {
+  minE = .Machine$double.xmax
   j = list(attribute=NA, value=NA)
-  for (att in X[1,]) {
-    XAtt = x[,att]
+  for (att in 1:ncol(X)) {
+    XAtt = X[,att]
     # QUALITATIVE
     if (class(XAtt) != "numeric") {
-      E = ent(XAtt)$value
+      E = entropy(XAtt)$value
       if (E < minE) {
         minE = E
         j$attribute = att
@@ -118,7 +118,7 @@ attributeDivision <- function(X) {
     # QUANTITATIVE
     else {
       # Every way to separate a dataset
-      orderedY = orderVectorByOther(X[,attribute], Y)
+      orderedY = orderVectorByOther(XAtt, Y)
       for (sep in separations(orderedY)) {
         separated = divideDataset(X, sep)
         lenSep = length(separated)
@@ -134,7 +134,7 @@ attributeDivision <- function(X) {
       }
     }
   }
-  retur(j)
+  return(j)
 }
 
 # Takes data matrix X as input and creates a DecisionTree based on it
