@@ -39,7 +39,10 @@ filter <- function(X, condition) {
 # Returns a vector list of size (length(j) + 1) containing
 # different subsets of X divided depending on their values
 # for the attribute
-divideDataset <- function(X, attribute, values) {
+divideDataset <- function(X, values, attribute=1) {
+  if (is.null(dim(X))) {
+    X = matrix(X, ncol = 1)
+  }
   attr = X[,attribute]
   res = list()
   lenValues = length(values)
@@ -49,6 +52,41 @@ divideDataset <- function(X, attribute, values) {
   }
   res[[lenValues+1]] = X[attr >= values[lenValues],]
   return(res)
+}
+
+attributeDivision <- function(X) {
+  minE = double.xmax
+  j = list(attribute=NA, value=NA)
+  for (att in X[1,]) {
+    XAtt = x[,att]
+    # QUALITATIVE
+    if (class(XAtt) != "numeric") {
+      E = ent(XAtt)$value
+      if (E < minE) {
+        minE = E
+        j$attribute = att
+        # TODO : What is j$value ?
+      }
+    }
+    # QUANTITATIVE
+    else {
+      # Every way to separate a dataset
+      for (sep in separations(X, attribute)) {
+        separated = divideDataset(X, sep)
+        lenSep = length(separated)
+        E = 0
+        for (portion in separated) {
+          E = E - (length(portion) / lenSep) * entropy(portion) 
+        }
+        if (E < minE) {
+          minE = E
+          j$attribute = att
+          j$value = sep
+        }
+      }
+    }
+  }
+  retur(j)
 }
 
 # Takes data matrix X as input and creates a DecisionTree based on it
@@ -62,7 +100,7 @@ decisionTree <- function(X, theta) {
   else {
     j <- attributeDivision(X)
     subNode = decisionNode()
-    subX = divideDataset(X, j)
+    subX = divideDataset(X, j$value, j$attribute)
     for (i in (1:length(subX))) {
       node$children[i] = decisionTree(subX[i], theta)
     }
