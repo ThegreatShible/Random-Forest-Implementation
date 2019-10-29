@@ -65,22 +65,32 @@ orderVectorByOther <- function(x, Y) {
 
 
 separations <- function(X, n=2) {
+  # n is the resulting number of categories so there will be (n-1) indices of separation
   len = length(X)
   last = X[1]
   res = list()
   count=0
   if (n > 1) {
-    for (i in 2:length(X)) {
+    for (i in 2:len) {
+      # Find where the class change to get the first separator
       if (X[i] != last) {
         last = X[i]
+        
+        # Case where we only need one separator
         if (n==2) {
           count = count + 1
           res[[count]] = i
         }
+        
+        # Case where we need more separators
         else {
+          # Call the function recursively on the rest of the elements after the separator
           subSep = separations(X[i:len], n=n-1)
           for (s in subSep) {
             count = count+1
+            
+            # Concat the recursive result with the current one
+            # by keeping track of the offset
             res[[count]] = c(i,s+i-1)
           }
         }
@@ -108,7 +118,7 @@ attributeDivision <- function(X) {
     # QUANTITATIVE
     else {
       # Every way to separate a dataset
-      orderedY = orderVectorByOther(X[,attr], Y)
+      orderedY = orderVectorByOther(X[,attribute], Y)
       for (sep in separations(orderedY)) {
         separated = divideDataset(X, sep)
         lenSep = length(separated)
