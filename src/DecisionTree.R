@@ -11,11 +11,21 @@ decisionNode <- function(attribute=NA, value=NA, class=NA, children=NA) {
 }
 
 # Returns entropy of a given dataset and majority class
-entropy <- function(X) {
-  print("TODO")
+entropy <- function(Y) {
+  nbElements = length(Y)
+  value = 0
+  max = 0
+  majority = NULL
+  for (l in levels(as.factor(Y))) {
+    ratio = length(Y[Y == l]) / nbElements
+    value = value - ratio*log(ratio)
+    if (ratio > max) {
+      majority = l
+    }
+  }
   return(list(
-    value=0,
-    majorityClass=0
+    value=value,
+    majorityClass=majority
   ))
 }
 
