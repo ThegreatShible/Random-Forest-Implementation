@@ -19,11 +19,25 @@ entropy <- function(X) {
   ))
 }
 
+filter <- function(X, condition) {
+  
+  for (i in (1:nrow(X))) {
+    
+  }
+}
+
 # Returns a vector list of size (length(j) + 1) containing
 # different subsets of X divided depending on their values
 # for the attribute
 divideDataset <- function(X, attribute, values) {
-  print("TODO")
+  res = list()
+  lenValues = length(values)
+  res[[1]] = X[X[,attribute] < values[1],]
+  for (i in (2:lenValues)) {
+    res[[i]] = X[values[i-1] <= X[,attribute] & X[,attribute] < values[i],]
+  }
+  res[[lenValues+1]] = X[X[,attribute] > values[lenValues],]
+  return(res)
 }
 
 # Takes data matrix X as input and creates a DecisionTree based on it
