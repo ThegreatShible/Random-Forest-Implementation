@@ -36,7 +36,7 @@ divideDataset <- function(X, attribute, values) {
   for (i in (2:lenValues)) {
     res[[i]] = X[values[i-1] <= X[,attribute] & X[,attribute] < values[i],]
   }
-  res[[lenValues+1]] = X[X[,attribute] > values[lenValues],]
+  res[[lenValues+1]] = X[X[,attribute] >= values[lenValues],]
   return(res)
 }
 
