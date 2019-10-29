@@ -30,13 +30,14 @@ filter <- function(X, condition) {
 # different subsets of X divided depending on their values
 # for the attribute
 divideDataset <- function(X, attribute, values) {
+  attr = X[,attribute]
   res = list()
   lenValues = length(values)
-  res[[1]] = X[X[,attribute] < values[1],]
+  res[[1]] = X[attr < values[1],]
   for (i in (2:lenValues)) {
-    res[[i]] = X[values[i-1] <= X[,attribute] & X[,attribute] < values[i],]
+    res[[i]] = X[values[i-1] <= attr & attr < values[i],]
   }
-  res[[lenValues+1]] = X[X[,attribute] >= values[lenValues],]
+  res[[lenValues+1]] = X[attr >= values[lenValues],]
   return(res)
 }
 
