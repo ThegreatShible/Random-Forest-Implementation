@@ -100,6 +100,46 @@ separations <- function(X, n=2) {
   return(res)
 }
 
+partition <- function(collection){
+  if (length(collection) == 1) {
+    return(list(list(collection)))
+  }
+  res = list()
+  count = 0
+  first = collection[1]
+  smalls = partition(collection[2:length(collection)])
+  for (smaller in smalls){
+    # insert `first` in each of the subpartition's subsets
+    for (n in (1:length(smaller))) {
+      count = count + 1
+      res[[count]] = list()
+      i=0
+      
+      if (n>1) {
+        for (i in (1:(n-1)))
+          res[[count]][[i]] = smaller[[i]]
+      }
+      
+      res[[count]][[n]] = c(first, smaller[[n]])
+      
+      if (n<length(smaller)) {
+        for (i in ((n+1):length(smaller)))
+          res[[count]][[i]] = smaller[[i]]
+        #i = i + 1
+        #res[[count]][[i]] = smaller[[(n+1):length(smaller)]]
+      }
+      
+    }
+    # put `first` in its own subset 
+    count = count + 1
+    res[[count]] = smaller
+    res[[count]][[length(res[[count]]) + 1]] = first
+  }
+  return(res)
+}
+
+a = c(1,2,3,4)
+partition(a)
 
 attributeDivision <- function(X, Y) {
   minE = .Machine$double.xmax
