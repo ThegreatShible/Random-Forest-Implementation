@@ -313,12 +313,17 @@ print.decisionTree <- function(t) {
 
 printTree <- function(tree) {
   print(tree)
-  for (t in tree$children) {
-    print("v v v v")
-    printTree(t)
-    print("--------")
-    print(tree)
+  if (length(tree$children) > 0) {
+    for (i in (1:length(tree$children))) {
+      t = tree$children[[i]]
+      print(paste("vvv CHILD ", i, " vvv"))
+      printTree(t)
+      print("--- GO UP ---")
+      print(tree)
+    }
   }
+  else
+    print(tree)
 }
 
 decisionTree.predict <- function(node, x) {
