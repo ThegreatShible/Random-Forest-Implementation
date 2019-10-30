@@ -220,18 +220,22 @@ splipattributeDivision <- function(X, Y) {
     else {
       # Every way to separate a dataset
       orderedY = orderVectorByOther(Y, XAtt)
-      
-      for (sep in separations(orderedY)) {
-        separated = divideDataset(X, sep)
+      for (sep in separate(orderedY, n=n)) {
+        #separated = divideDataset(X, sep)
         lenSep = length(separated)
         E = 0
-        for (portion in separated) {
+        for (portion in sep) {
           E = E - (length(portion) / lenSep) * entropy(portion) 
         }
         if (E < minE) {
+          
+          # Recover the corresponding x values for the frontier
+          indices = cumsum(lapply(sep[1:n-1], length))+1
+          values = X[indices]
+          
           minE = E
           j$attribute = att
-          j$value = sep
+          j$value = values
         }
       }
     }
