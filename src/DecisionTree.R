@@ -40,26 +40,38 @@ filter <- function(X, condition) {
 # Returns a vector list of size (length(j) + 1) containing
 # different subsets of X divided depending on their values
 # for the attribute
-divideDataset <- function(X, values, attribute=1, quantitative=TRUE) {
+divideDataset <- function(X, values=NULL, indices=NULL, attribute=1, quantitative=TRUE) {
   if (is.null(dim(X))) {
     X = matrix(X, ncol = 1)
   }
   attr = X[,attribute]
   res = list()
-  lenValues = length(values)
-  if (quantitative) {
-    res[[1]] = X[attr < values[1],]
-    if (lenValues > 1) {
-      for (i in (2:lenValues)) {
-        res[[i]] = matrix(X[values[i-1] <= attr & attr < values[i],], ncol=ncol(X))
+  if (!is.null(values)) {
+    lenValues = length(values)
+    if (quantitative) {
+      res[[1]] = matrix(X[attr < values[1],], ncol=ncol(X))
+      if (lenValues > 1) {
+        for (i in (2:lenValues)) {
+          res[[i]] = matrix(X[values[i-1] <= attr & attr < values[i],], ncol=ncol(X))
+        }
+      }
+      res[[lenValues+1]] = matrix(X[attr >= values[lenValues],], ncol=ncol(X))
+    }
+    else {
+      for (i in 1:lenValues) {
+        res[[i]] = matrix(X[values[i] == attr,], ncol=ncol(X))
       }
     }
-    res[[lenValues+1]] = X[attr >= values[lenValues],]
   }
-  else {
-    for (i in 1:lenValues) {
-      res[[i]] = matrix(X[values[i] == attr,], ncol=ncol(X))
+  else if (!is.null(indices)) {
+    res[[1]] = matrix(X[1:(indices[1]-1),], ncol=ncol(X))
+    lenIndices = length(indices)
+    if (lenIndices > 1) {
+      for (i in 2:lenIndices) {
+        res[[i]] = matrix(X[indices[i-1]:(indices[i]-1),], ncol=ncol(X))
+      }
     }
+    res[[lenIndices+1]] = matrix(X[indices[lenIndices]:nrow(X),], ncol=ncol(X))
   }
   return(res)
 }
@@ -206,7 +218,7 @@ is.qualitative <- function(X) {
 attributeDivision <- function(X, Y, n=2) {
   lenX = nrow(X)
   minE = .Machine$double.xmax
-  j = list(attribute=NA, values=NA, quantitative=NA)
+  j = list(attribute=NA, values=NA, indices=NA, quantitative=NA)
   
   # Loop through every attribute
   for (att in 1:ncol(X)) {
@@ -245,12 +257,13 @@ attributeDivision <- function(X, Y, n=2) {
         if (E < minE) {
           
           # Recover the corresponding x values for the frontier
-          indices = cumsum(lapply(sep[1:n-1], length))+1
+          indices = cumsum(lapply(sep[1:(n-1)], length))+1
           values = sort(XAtt)[indices]
           
           minE = E
           j$attribute = att
           j$values = values
+          j$indices=indices
           j$quantitative=TRUE
         }
       }
@@ -263,7 +276,7 @@ attributeDivision <- function(X, Y, n=2) {
 decisionTree <- function(X, Y, theta, n=2) {
   node = NULL
   entropyY = entropy(Y)
-  if (entropyY$value < theta) {
+  if (entropyY$value < theta || nrow(X)==0) {
     node = decisionNode(
       class=entropyY$majorityClass)
     return(node)
@@ -275,11 +288,13 @@ decisionTree <- function(X, Y, theta, n=2) {
       values=j$values,
       quantitative=j$quantitative
       )
-    sub = divideDataset(matrix(cbind(X, Y), ncol=ncol(X)+1), values=node$values, attribute=node$attribute, quantitative=node$quantitative)
+    xy = matrix(cbind(X, Y), ncol=ncol(X)+1)
+    sub = divideDataset(xy[order(xy[,node$attribute]),], indices=j$indices, attribute=node$attribute, quantitative=node$quantitative)
+    print(sub)
     for (i in (1:length(sub))) {
       subi = matrix(sub[[i]], ncol=ncol(X)+1)
       subTree = decisionTree(subi[,-ncol(subi)], subi[,ncol(subi)], theta)
-      node$children[i] = subTree
+      node$children[[i]] = subTree
     }
     return(node)
   }
