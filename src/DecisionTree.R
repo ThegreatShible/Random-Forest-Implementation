@@ -19,7 +19,8 @@ entropy <- function(Y) {
   majority = NULL
   for (l in levels(as.factor(Y))) {
     ratio = length(Y[Y == l]) / nbElements
-    value = value - ratio*log(ratio)
+    if (ratio > 0)
+      value = value - ratio*log(ratio)
     if (ratio > max) {
       majority = l
     }
@@ -49,29 +50,36 @@ divideDataset <- function(X, values=NULL, indices=NULL, attribute=1, quantitativ
   if (!is.null(values)) {
     lenValues = length(values)
     if (quantitative) {
-      res[[1]] = matrix(X[attr < values[1],], ncol=ncol(X))
+      #res[[1]] = matrix(X[attr < values[1],], ncol=ncol(X))
+      res[[1]] = X[attr < values[1],]
       if (lenValues > 1) {
         for (i in (2:lenValues)) {
-          res[[i]] = matrix(X[values[i-1] <= attr & attr < values[i],], ncol=ncol(X))
+          #res[[i]] = matrix(X[values[i-1] <= attr & attr < values[i],], ncol=ncol(X))
+          res[[i]] = X[values[i-1] <= attr & attr < values[i],]
         }
       }
-      res[[lenValues+1]] = matrix(X[attr >= values[lenValues],], ncol=ncol(X))
+      #res[[lenValues+1]] = matrix(X[attr >= values[lenValues],], ncol=ncol(X))
+      res[[lenValues+1]] = X[attr >= values[lenValues],]
     }
     else {
       for (i in 1:lenValues) {
-        res[[i]] = matrix(X[values[i] == attr,], ncol=ncol(X))
+        #res[[i]] = matrix(X[values[i] == attr,], ncol=ncol(X))
+        res[[i]] = X[values[i] == attr,]
       }
     }
   }
   else if (!is.null(indices)) {
-    res[[1]] = matrix(X[1:(indices[1]-1),], ncol=ncol(X))
+    #res[[1]] = matrix(X[1:(indices[1]-1),], ncol=ncol(X))
+    res[[1]] = X[1:(indices[1]-1),]
     lenIndices = length(indices)
     if (lenIndices > 1) {
       for (i in 2:lenIndices) {
-        res[[i]] = matrix(X[indices[i-1]:(indices[i]-1),], ncol=ncol(X))
+        #res[[i]] = matrix(X[indices[i-1]:(indices[i]-1),], ncol=ncol(X))
+        res[[i]] = X[indices[i-1]:(indices[i]-1),]
       }
     }
-    res[[lenIndices+1]] = matrix(X[indices[lenIndices]:nrow(X),], ncol=ncol(X))
+    #res[[lenIndices+1]] = matrix(X[indices[lenIndices]:nrow(X),], ncol=ncol(X))
+    res[[lenIndices+1]] = X[indices[lenIndices]:nrow(X),]
   }
   return(res)
 }
@@ -288,10 +296,12 @@ decisionTree <- function(X, Y, theta, n=2) {
       values=j$values,
       quantitative=j$quantitative
       )
-    xy = matrix(cbind(X, Y), ncol=ncol(X)+1)
+    #xy = matrix(cbind(X, Y), ncol=ncol(X)+1)
+    xy = (cbind(X, Y))
     sub = divideDataset(xy[order(xy[,node$attribute]),], indices=j$indices, attribute=node$attribute, quantitative=node$quantitative)
     for (i in (1:length(sub))) {
-      subi = matrix(sub[[i]], ncol=ncol(X)+1)
+      #subi = matrix(sub[[i]], ncol=ncol(X)+1)
+      subi = sub[[i]]
       subTree = decisionTree(subi[,-ncol(subi)], subi[,ncol(subi)], theta)
       node$children[[i]] = subTree
     }
@@ -316,9 +326,12 @@ printTree <- function(tree) {
   if (length(tree$children) > 0) {
     for (i in (1:length(tree$children))) {
       t = tree$children[[i]]
+      print("")
       print(paste("vvv CHILD ", i, " vvv"))
       printTree(t)
+      print("")
       print("--- GO UP ---")
+      print("")
       print(tree)
     }
   }

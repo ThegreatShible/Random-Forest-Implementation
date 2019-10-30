@@ -1,0 +1,6 @@
+X = cbind(c(rnorm(200, 1, 1),rnorm(200, 3, 1)), c(rnorm(200,1,1),rnorm(200,3,1)))
+Y = c(rep(0,200), rep(1,200))
+plot(X[,1], X[,2], col=c("red", "blue")[as.factor(Y)])
+source("decisionTree.R")
+tree=decisionTree(X,Y,0.4)
+printTree(tree)
