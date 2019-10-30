@@ -79,10 +79,10 @@ divideDataset <- function(X, values=NULL, indices=NULL, attribute=1, quantitativ
 # Takes 2 vectors, sorts the first one and applies the same
 # sorting to the second one
 orderVectorByOther <- function(Y, x) {
-  x = cbind(x, (1:length(x)))
-  x = x[order(x[,1]),]
-  Y=Y[x[,2]]
-  return(Y)
+  z = cbind(x, Y)
+  z = z[order(z[,1]),]
+  z = z[,2]
+  return(z)
 }
 
 # gives all possible separations indices
