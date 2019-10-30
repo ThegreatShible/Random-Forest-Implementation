@@ -1,8 +1,8 @@
 # Returns only a node made of the separation attribute and separation value
-decisionNode <- function(attribute=NA, value=NA, quantitative=TRUE, class=NA, children=NA) {
+decisionNode <- function(attribute=NA, values=NA, quantitative=TRUE, class=NA, children=list()) {
   node <- list(
     attribute=attribute, # attribute we check
-    value=value, # value(s) to compare to to choose the branch
+    values=values, # value(s) to compare to to choose the branch
     quantitative=quantitative, # is attribute to check discrete or continue
     class=class, # class prediction if we are done
     children=children
@@ -200,7 +200,7 @@ splitClasses <- function(classes, n=2) {
 attributeDivision <- function(X, Y, n=2) {
   lenX = nrow(X)
   minE = .Machine$double.xmax
-  j = list(attribute=NA, value=NA)
+  j = list(attribute=NA, value=NA, qualitative=NA)
   
   # Loop through every attribute
   for (att in 1:ncol(X)) {
@@ -214,13 +214,13 @@ attributeDivision <- function(X, Y, n=2) {
       separated = divideDataset(cbind(X, Y), classes, attribute=att, quantitative=FALSE)
       E=0
       for (portion in separated) {
-        print(portion)
         E = E + (NROW(portion) / lenX) * (entropy(portion[,NCOL(portion)])$value)
       }
       if (E < minE) {
         minE = E
         j$attribute = att
-        j$value = classes
+        j$values = classes
+        j$quantitative=FALSE
       }
     }
     # QUANTITATIVE
@@ -244,7 +244,8 @@ attributeDivision <- function(X, Y, n=2) {
           
           minE = E
           j$attribute = att
-          j$value = values
+          j$values = values
+          j$quantitative=TRUE
         }
       }
     }
@@ -253,20 +254,27 @@ attributeDivision <- function(X, Y, n=2) {
 }
 
 # Takes data matrix X as input and creates a DecisionTree based on it
-decisionTree <- function(X, theta) {
-  node = decisionNode()
-  entropyX = entropy(X)
-  if (entropyX$value < theta) {
-    node$class = entropyX$majorityClass
+decisionTree <- function(X, Y, theta, n=2) {
+  node = NULL
+  entropyY = entropy(Y)
+  if (entropyY$value < theta) {
+    node = decisionNode(
+      class=entropyY$majorityClass)
     return(node)
   }
   else {
-    j <- attributeDivision(X)
-    subNode = decisionNode()
-    subX = divideDataset(X, j$value, j$attribute)
-    for (i in (1:length(subX))) {
-      node$children[i] = decisionTree(subX[i], theta)
+    j <- attributeDivision(X, Y, n=n)
+    node = decisionNode(
+      attribute=j$attribute,
+      values=j$values,
+      quantitative=j$quantitative
+      )
+    sub = divideDataset(matrix(cbind(X, Y), ncol=ncol(X)+1), values=node$values, attribute=node$attribute)
+    for (i in (1:length(sub))) {
+      subTree = decisionTree(sub[i][-ncol(sub)], sub[i][ncol(sub)], theta)
+      node$children[i] = subTree
     }
     return(node)
   }
 }
+
