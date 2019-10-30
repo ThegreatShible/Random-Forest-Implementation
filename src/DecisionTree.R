@@ -197,7 +197,7 @@ splitClasses <- function(classes, n=2) {
   return(p[lapply(p, length) == n])
 }
 
-attributeDivision <- function(X, Y) {
+attributeDivision <- function(X, Y, n=2) {
   lenX = nrow(X)
   minE = .Machine$double.xmax
   j = list(attribute=NA, value=NA)
@@ -214,7 +214,7 @@ attributeDivision <- function(X, Y) {
       separated = divideDataset(cbind(X, Y), classes, attribute=att, quantitative=FALSE)
       E=0
       for (portion in separated) {
-        E = E - (nrow(portion) / lenX) * entropy(portion[,ncol(portion)])
+        E = E + (nrow(portion) / lenX) * (entropy(portion[,ncol(portion)])$value)
       }
       if (E < minE) {
         minE = E
@@ -233,13 +233,13 @@ attributeDivision <- function(X, Y) {
       for (sep in possibleSeparations) {
         E = 0
         for (portion in sep) {
-          E = E - (nrow(portion) / lenX) * entropy(portion) 
+          E = E + (length(portion) / lenX) * entropy(portion)$value
         }
         if (E < minE) {
           
           # Recover the corresponding x values for the frontier
           indices = cumsum(lapply(sep[1:n-1], length))+1
-          values = X[indices]
+          values = sort(XAtt)[indices]
           
           minE = E
           j$attribute = att
