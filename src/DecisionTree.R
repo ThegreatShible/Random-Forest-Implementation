@@ -49,8 +49,10 @@ divideDataset <- function(X, values, attribute=1, quantitative=TRUE) {
   lenValues = length(values)
   if (quantitative) {
     res[[1]] = X[attr < values[1],]
-    for (i in (2:lenValues)) {
-      res[[i]] = matrix(X[values[i-1] <= attr & attr < values[i],], ncol=ncol(X))
+    if (lenValues > 1) {
+      for (i in (2:lenValues)) {
+        res[[i]] = matrix(X[values[i-1] <= attr & attr < values[i],], ncol=ncol(X))
+      }
     }
     res[[lenValues+1]] = X[attr >= values[lenValues],]
   }
@@ -197,6 +199,10 @@ splitClasses <- function(classes, n=2) {
   return(p[lapply(p, length) == n])
 }
 
+is.qualitative <- function(X) {
+  return(class(X) != "numeric" && class(X) != "integer")
+}
+
 attributeDivision <- function(X, Y, n=2) {
   lenX = nrow(X)
   minE = .Machine$double.xmax
@@ -207,7 +213,7 @@ attributeDivision <- function(X, Y, n=2) {
     XAtt = X[,att]
     
     # QUALITATIVE
-    if (class(XAtt) != "numeric") {
+    if (is.qualitative(XAtt)) {
       
       classes = levels(as.factor(XAtt))
       # Separation of values in different classes
@@ -269,7 +275,7 @@ decisionTree <- function(X, Y, theta, n=2) {
       values=j$values,
       quantitative=j$quantitative
       )
-    sub = divideDataset(matrix(cbind(X, Y), ncol=ncol(X)+1), values=node$values, attribute=node$attribute)
+    sub = divideDataset(matrix(cbind(X, Y), ncol=ncol(X)+1), values=node$values, attribute=node$attribute, quantitative=node$quantitative)
     for (i in (1:length(sub))) {
       subTree = decisionTree(sub[i][-ncol(sub)], sub[i][ncol(sub)], theta)
       node$children[i] = subTree
