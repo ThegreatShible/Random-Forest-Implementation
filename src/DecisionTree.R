@@ -285,3 +285,25 @@ decisionTree <- function(X, Y, theta, n=2) {
   }
 }
 
+decisionTree.predict <- function(node, x) {
+  if(!is.na(node$class)) return(node$class)
+  else {
+    attr <- x[node$attribute]
+    if(node$quantitative) {
+      childIndex = 0
+      for (c in 1:length(node$values)){
+        if (attr < node$values[c]){
+          childIndex = c
+          break
+        }
+      }
+      if(childIndex == 0) childIndex = length(node$children)
+      return(decisionTree.predict(node$children[childIndex]), x)
+       
+    }else{
+      
+      return(decisionTree.predict(node$children[as.integer(attr)], x)) 
+      
+    } 
+  }
+}
