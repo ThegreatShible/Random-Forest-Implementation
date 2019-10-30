@@ -50,13 +50,13 @@ divideDataset <- function(X, values, attribute=1, quantitative=TRUE) {
   if (quantitative) {
     res[[1]] = X[attr < values[1],]
     for (i in (2:lenValues)) {
-      res[[i]] = X[values[i-1] <= attr & attr < values[i],]
+      res[[i]] = matrix(X[values[i-1] <= attr & attr < values[i],], ncol=ncol(X))
     }
     res[[lenValues+1]] = X[attr >= values[lenValues],]
   }
   else {
     for (i in 1:lenValues) {
-      res[[i]] = X[values[i] == attr,]
+      res[[i]] = matrix(X[values[i] == attr,], ncol=ncol(X))
     }
   }
   return(res)
@@ -214,7 +214,8 @@ attributeDivision <- function(X, Y, n=2) {
       separated = divideDataset(cbind(X, Y), classes, attribute=att, quantitative=FALSE)
       E=0
       for (portion in separated) {
-        E = E + (nrow(portion) / lenX) * (entropy(portion[,ncol(portion)])$value)
+        print(portion)
+        E = E + (NROW(portion) / lenX) * (entropy(portion[,NCOL(portion)])$value)
       }
       if (E < minE) {
         minE = E
