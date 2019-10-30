@@ -206,7 +206,7 @@ is.qualitative <- function(X) {
 attributeDivision <- function(X, Y, n=2) {
   lenX = nrow(X)
   minE = .Machine$double.xmax
-  j = list(attribute=NA, value=NA, qualitative=NA)
+  j = list(attribute=NA, values=NA, quantitative=NA)
   
   # Loop through every attribute
   for (att in 1:ncol(X)) {
@@ -277,7 +277,8 @@ decisionTree <- function(X, Y, theta, n=2) {
       )
     sub = divideDataset(matrix(cbind(X, Y), ncol=ncol(X)+1), values=node$values, attribute=node$attribute, quantitative=node$quantitative)
     for (i in (1:length(sub))) {
-      subTree = decisionTree(sub[i][-ncol(sub)], sub[i][ncol(sub)], theta)
+      subi = matrix(sub[[i]], ncol=ncol(X)+1)
+      subTree = decisionTree(subi[,-ncol(subi)], subi[,ncol(subi)], theta)
       node$children[i] = subTree
     }
     return(node)
