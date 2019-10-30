@@ -1,6 +1,9 @@
 source("src/DecisioNTree.R")
 library(parallel)
 library(foreach)
+
+
+#TODO : Ajouter les imports dans le foreach 
 RandomForest <- setRefClass("RandomForest",
    fields = list(nbTrees = "integer", theta = "numeric"),
    methods = list(
@@ -18,7 +21,7 @@ TrainedRandomForest <- setRefClass("TrainedRandomForest",
    fields = c("trees"),
    methods = list(
      predict = function(x) {
-       predictions = foreach(tree = 1:length(trees)) %dopar% decisionTree.predict(tree, x)
+       predictions = foreach(tree = 1:length(trees), .export="decisionTree.predict") %dopar% decisionTree.predict(tree, x)
        return (which.max(tabulate(predictions)))
      }
    ))
