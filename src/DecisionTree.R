@@ -197,35 +197,43 @@ splitClasses <- function(classes, n=2) {
   return(p[lapply(p, length) == n])
 }
 
-splipattributeDivision <- function(X, Y) {
+attributeDivision <- function(X, Y) {
+  lenX = nrow(X)
   minE = .Machine$double.xmax
   j = list(attribute=NA, value=NA)
+  
+  # Loop through every attribute
   for (att in 1:ncol(X)) {
     XAtt = X[,att]
+    
     # QUALITATIVE
     if (class(XAtt) != "numeric") {
-      separated = divideDataset(cbind(X, Y))
-      lenSep = length(separated)
+      
+      classes = levels(as.factor(XAtt))
+      # Separation of values in different classes
+      separated = divideDataset(cbind(X, Y), classes, attribute=att, quantitative=FALSE)
       E=0
       for (portion in separated) {
-        E = E - (length(portion) / lenSep) * entropy(portion[,length(portion)])
+        E = E - (nrow(portion) / lenX) * entropy(portion[,ncol(portion)])
       }
       if (E < minE) {
         minE = E
         j$attribute = att
-        # TODO : What is j$value ?
+        j$value = classes
       }
     }
     # QUANTITATIVE
     else {
-      # Every way to separate a dataset
+      
+      # Y vector re-ordered according to X sorted by specific attribute
       orderedY = orderVectorByOther(Y, XAtt)
-      for (sep in separate(orderedY, n=n)) {
-        #separated = divideDataset(X, sep)
-        lenSep = length(separated)
+      
+      # Every way to separate a dataset
+      possibleSeparations = separate(orderedY, n=n)
+      for (sep in possibleSeparations) {
         E = 0
         for (portion in sep) {
-          E = E - (length(portion) / lenSep) * entropy(portion) 
+          E = E - (nrow(portion) / lenX) * entropy(portion) 
         }
         if (E < minE) {
           
