@@ -290,13 +290,34 @@ decisionTree <- function(X, Y, theta, n=2) {
       )
     xy = matrix(cbind(X, Y), ncol=ncol(X)+1)
     sub = divideDataset(xy[order(xy[,node$attribute]),], indices=j$indices, attribute=node$attribute, quantitative=node$quantitative)
-    print(sub)
     for (i in (1:length(sub))) {
       subi = matrix(sub[[i]], ncol=ncol(X)+1)
       subTree = decisionTree(subi[,-ncol(subi)], subi[,ncol(subi)], theta)
       node$children[[i]] = subTree
     }
     return(node)
+  }
+}
+
+print.decisionTree <- function(t) {
+  if (!is.na(t$attribute))
+    print(paste("Attribute : ", t$attribute))
+  if (!is.na(t$values))
+    print(paste("Values : ", t$values))
+  len = length(t$children)
+  if (len > 0)
+    print(paste("Children : ", len))
+  if (!is.na(t$class))
+    print(paste("Class : ", t$class))
+}
+
+printTree <- function(tree) {
+  print(tree)
+  for (t in tree$children) {
+    print("v v v v")
+    printTree(t)
+    print("--------")
+    print(tree)
   }
 }
 
