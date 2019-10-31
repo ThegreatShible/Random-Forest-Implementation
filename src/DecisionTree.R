@@ -22,6 +22,7 @@ entropy <- function(Y) {
     if (ratio > 0)
       value = value - ratio*log(ratio)
     if (ratio > max) {
+      max = ratio
       majority = l
     }
   }
