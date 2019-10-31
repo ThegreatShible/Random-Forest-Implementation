@@ -299,7 +299,7 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
         }
       }
     }
-    nbValidSampledAttributes = nbValidAttributes +1
+    nbValidSampledAttributes = nbValidSampledAttributes +1
     #Remove sampled attribute to sample another one
     sampleVector = sampleVector[sampleVector != att]
   }
@@ -336,11 +336,11 @@ decisionTree <- function(X, Y, theta,r, n=2, validAttributes= 1:ncol(X)) {
         )
       #xy = matrix(cbind(X, Y), ncol=ncol(X)+1)
       xy = (cbind(X, Y))
-      sub = divideDataset(xy[order(xy[,node$attribute]),], indices=j$indices, attribute=node$attribute, quantitative=node$quantitative)
+      sub = divideDataset(xy[order(xy[,node$attribute]),], indices=j$indices, values=j$values, attribute=node$attribute, quantitative=node$quantitative)
       for (i in (1:length(sub))) {
         #subi = matrix(sub[[i]], ncol=ncol(X)+1)
         subi = sub[[i]]
-        subTree = decisionTree(subi[,-ncol(subi)], subi[,ncol(subi)], theta, j$validAttributes)
+        subTree = decisionTree(subi[,-ncol(subi)], subi[,ncol(subi)], theta, r, n, j$validAttributes)
         node$children[[i]] = subTree
       }
       return(node)
