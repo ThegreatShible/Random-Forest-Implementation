@@ -8,8 +8,12 @@ RandomForest <- setRefClass("RandomForest",
    fields = list(nbTrees = "integer", theta = "numeric"),
    methods = list(
      train = function(X,Y) {
+       data = cbind(X,Y)
        trainedTrees = foreach(i = 1:nbTrees) %dopar% {
-         decisionTree(X,Y,theta)
+         d = data[sample(nrow(data)),]
+         localX = d[, -ncol(d)]
+         localY = d[, ncol(d)] 
+         decisionTree(localX,localY,theta)
        }
        return (TrainedRandomForest(trees = trainedTrees))
      }
