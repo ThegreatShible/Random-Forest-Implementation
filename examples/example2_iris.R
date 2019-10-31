@@ -5,14 +5,15 @@ iris
 shuffled = iris[sample(nrow(iris)),]
 trainProportion = (60/100) * nrow(iris)
 train = shuffled[1:trainProportion,]
-extraTrain <- sample(1:300,  dim(train)[1], TRUE)
+#extraTrain <- sample(1:300,  dim(train)[1], TRUE)
 
 test = shuffled[(trainProportion+1):nrow(shuffled),]
-extraTest <- sample(1:300,  dim(test)[1], TRUE)
+#extraTest <- sample(1:300,  dim(test)[1], TRUE)
 
 Xtrain = train[,-ncol(train)]
-Xtrain["extra"] <- factor(extraTrain)
-Xtrain = Xtrain["extra"]
+Xtrain["Petal.Length.Int"] = as.factor(floor(Xtrain[,"Petal.Length"]))
+#Xtrain["extra"] <- factor(extraTrain)
+#Xtrain = Xtrain["extra"]
 Ytrain = train[,ncol(train)]
 tree = decisionTree(Xtrain, Ytrain, 0.4, 2)
 
