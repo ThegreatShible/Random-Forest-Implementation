@@ -285,7 +285,7 @@ attributeDivision <- function(X, Y, n=2) {
 decisionTree <- function(X, Y, theta, n=2) {
   node = NULL
   entropyY = entropy(Y)
-  if (entropyY$value < theta || nrow(X)==0) {
+  if (entropyY$value < theta) {
     node = decisionNode(
       prediction=entropyY$majorityClass)
     return(node)
