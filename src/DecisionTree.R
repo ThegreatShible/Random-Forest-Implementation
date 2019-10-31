@@ -32,12 +32,6 @@ entropy <- function(Y) {
   ))
 }
 
-filter <- function(X, condition) {
-  
-  for (i in (1:nrow(X))) {
-    
-  }
-}
 
 # Returns a vector list of size (length(j) + 1) containing
 # different subsets of X divided depending on their values
