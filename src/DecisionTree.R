@@ -340,6 +340,7 @@ printTree <- function(tree) {
     print(tree)
 }
 
+#small comment to check 
 decisionTree.predict <- function(node, x) {
   if(!is.na(node$prediction)) return(node$prediction)
   else {
