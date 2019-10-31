@@ -352,7 +352,7 @@ decisionTree.predict <- function(node, x) {
         }
       }
       if(childIndex == 0) childIndex = length(node$children)
-      return(decisionTree.predict(node$children[childIndex]), x)
+      return(decisionTree.predict(node$children[childIndex],x))
        
     }else{
       
