@@ -1,10 +1,10 @@
 # Returns only a node made of the separation attribute and separation value
-decisionNode <- function(attribute=NA, values=NA, quantitative=TRUE, class=NA, children=list()) {
+decisionNode <- function(attribute=NA, values=NA, quantitative=TRUE, prediction=NA, children=list()) {
   node <- list(
     attribute=attribute, # attribute we check
     values=values, # value(s) to compare to to choose the branch
     quantitative=quantitative, # is attribute to check discrete or continue
-    class=class, # class prediction if we are done
+    prediction=prediction, # class prediction if we are done
     children=children
   )
   class(node) = "decisionTree"
@@ -287,7 +287,7 @@ decisionTree <- function(X, Y, theta, n=2) {
   entropyY = entropy(Y)
   if (entropyY$value < theta || nrow(X)==0) {
     node = decisionNode(
-      class=entropyY$majorityClass)
+      prediction=entropyY$majorityClass)
     return(node)
   }
   else {
@@ -318,8 +318,8 @@ print.decisionTree <- function(t) {
   len = length(t$children)
   if (len > 0)
     print(paste("Children : ", len))
-  if (!is.na(t$class))
-    print(paste("Class : ", t$class))
+  if (!is.na(t$prediction))
+    print(paste("Prediction : ", t$prediction))
 }
 
 printTree <- function(tree) {
@@ -341,7 +341,7 @@ printTree <- function(tree) {
 }
 
 decisionTree.predict <- function(node, x) {
-  if(!is.na(node$class)) return(node$class)
+  if(!is.na(node$prediction)) return(node$prediction)
   else {
     attr <- x[node$attribute]
     if(node$quantitative) {
@@ -353,7 +353,7 @@ decisionTree.predict <- function(node, x) {
         }
       }
       if(childIndex == 0) childIndex = length(node$children)
-      return(decisionTree.predict(node$children[childIndex],x))
+      return(decisionTree.predict(node$children[[childIndex]],x))
        
     }else{
       
