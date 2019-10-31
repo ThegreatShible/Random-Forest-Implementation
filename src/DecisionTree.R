@@ -1,5 +1,5 @@
 # Returns only a node made of the separation attribute and separation value
-decisionNode <- function(attribute=NA, values=NA, quantitative=TRUE, prediction=NA, children=list()) {
+decisionNode <- function(attribute=NA, values=NA, quantitative=TRUE, prediction=NULL, children=list()) {
   node <- list(
     attribute=attribute, # attribute we check
     values=values, # value(s) to compare to to choose the branch
@@ -255,7 +255,9 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
       
       E=0
       for (portion in separated) {
-        E = E + (NROW(portion) / lenX) * (entropy(portion[,NCOL(portion)])$value)
+        
+        if(nrow(portion) !=0)
+          E = E + (NROW(portion) / lenX) * (entropy(portion[,NCOL(portion)])$value)
       }
       if (E < minE) {
         minE = E
@@ -340,15 +342,18 @@ decisionTree <- function(X, Y, theta,r, n=2, validAttributes= 1:ncol(X)) {
       for (i in (1:length(sub))) {
         #subi = matrix(sub[[i]], ncol=ncol(X)+1)
         subi = sub[[i]]
-        subTree = decisionTree(subi[,-ncol(subi)], subi[,ncol(subi)], theta, r, n, j$validAttributes)
-        node$children[[i]] = subTree
+        if(nrow(subi) == 0) node$children[[i]] =decisionNode(prediction=entropyY$majorityClass)
+        else {
+          subTree = decisionTree(subi[,-ncol(subi)], subi[,ncol(subi)], theta, r, n, j$validAttributes)
+          node$children[[i]] = subTree
+        }
       }
       return(node)
     }
   }
 }
 
-print.decisionTree <- function(t) {
+print.decisionTree <- function(t, useS4 = FALSE) {
   if (!is.na(t$attribute))
     print(paste("Attribute : ", t$attribute))
   if (!is.na(t$values))
@@ -356,7 +361,7 @@ print.decisionTree <- function(t) {
   len = length(t$children)
   if (len > 0)
     print(paste("Children : ", len))
-  if (!is.na(t$prediction))
+  if (!is.null(t$prediction))
     print(paste("Prediction : ", t$prediction))
 }
 
@@ -378,26 +383,34 @@ printTree <- function(tree) {
     print(tree)
 }
 
-#small comment to check 
+# Walah R c'est pas un langage.
 decisionTree.predict <- function(node, x) {
-  if(!is.na(node$prediction)) return(node$prediction)
-  else {
-    attr <- x[node$attribute]
-    if(node$quantitative) {
-      childIndex = 0
-      for (c in 1:length(node$values)){
-        if (attr < node$values[c]){
-          childIndex = c
-          break
+  tryCatch({
+    pred <- node[[1]]$prediction
+    return (pred)
+  }, error = function(cond){
+    if(! is.null(node$prediction)) return(node$prediction)
+    else {
+      attr <- x[node$attribute]
+      if(node$quantitative) {
+        childIndex = 0
+        for (c in 1:length(node$values)){
+          if (attr < node$values[c]){
+            childIndex = c
+            break
+          }
         }
-      }
-      if(childIndex == 0) childIndex = length(node$children)
-      return(decisionTree.predict(node$children[[childIndex]],x))
-       
-    }else{
-      
-      return(decisionTree.predict(node$children[as.integer(attr)], x)) 
-      
-    } 
+        if(childIndex == 0) childIndex = length(node$children)
+        return(decisionTree.predict(node$children[[childIndex]],x))
+        
+      }else{
+        
+        return(decisionTree.predict(node$children[as.integer(attr)], x)) 
+        
+      } 
+    }
+    
   }
+    
+  )
 }
