@@ -224,21 +224,35 @@ is.qualitative <- function(X) {
   return(class(X) != "numeric" && class(X) != "integer")
 }
 
-attributeDivision <- function(X, Y, n=2) {
+attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
   lenX = nrow(X)
   minE = .Machine$double.xmax
-  j = list(attribute=NA, values=NA, indices=NA, quantitative=NA)
-  
+  j = list(attribute=NA, values=NA, indices=NA, quantitative=NA, validAttributes = NA)
+
+  nbValidSampledAttributes = 0
+  nbValidAttributes = length(validAttributes)
+  removedAttributes = c()
+  sampleVector = validAttributes
+  while(nbValidSampledAttributes < r && nbValidSampledAttributes < nbValidAttributes ){
   # Loop through every attribute
-  for (att in 1:ncol(X)) {
+    att = sample(sampleVector, 1)
+    sampleVector = sampleVector[sampleVector != att]
     XAtt = X[,att]
     
     # QUALITATIVE
     if (is.qualitative(XAtt)) {
       
       classes = levels(as.factor(XAtt))
+      if(length(classes) == 1) {
+        #If there is no separation, remove the attribute from node and don't sample it.
+        removedAttributes <- c(removedAttributes, att)
+        nbValidAttributes = nbValidAttributes - 1
+        sampleVector = sampleVector[sampleVector != att]
+        next
+      }
       # Separation of values in different classes
       separated = divideDataset(cbind(X, Y), classes, attribute=att, quantitative=FALSE)
+      
       E=0
       for (portion in separated) {
         E = E + (NROW(portion) / lenX) * (entropy(portion[,NCOL(portion)])$value)
@@ -249,6 +263,9 @@ attributeDivision <- function(X, Y, n=2) {
         j$values = classes
         j$quantitative=FALSE
       }
+      
+      
+  
     }
     # QUANTITATIVE
     else {
@@ -258,6 +275,11 @@ attributeDivision <- function(X, Y, n=2) {
       
       # Every way to separate a dataset
       possibleSeparations = separate(orderedY, n=n)
+      #if (length(possibleSeparations) == 0) {
+      #  removedAttributes <- c(removedAttributes, att)
+      #  nbValidAttributes = nbValidAttributes - 1
+      #  next
+      #}
       for (sep in possibleSeparations) {
         E = 0
         for (portion in sep) {
@@ -277,12 +299,25 @@ attributeDivision <- function(X, Y, n=2) {
         }
       }
     }
+    nbValidSampledAttributes = nbValidAttributes +1
+    #Remove sampled attribute to sample another one
+    sampleVector = sampleVector[sampleVector != att]
   }
+  
+  if(nbValidSampledAttributes== 0) return(NULL)
+  else {
+    if(!j$quantitative) {
+      removedAttributes <- c(removedAttributes, j$att)
+    }
+  }
+  newValidAttributes = validAttributes[!(validAttributes %in% removedAttributes)]
+  j$validAttributes = newValidAttributes
+  
   return(j)
 }
 
 # Takes data matrix X as input and creates a DecisionTree based on it
-decisionTree <- function(X, Y, theta, n=2) {
+decisionTree <- function(X, Y, theta,r, n=2, validAttributes= 1:ncol(X)) {
   node = NULL
   entropyY = entropy(Y)
   if (entropyY$value < theta) {
@@ -291,22 +326,25 @@ decisionTree <- function(X, Y, theta, n=2) {
     return(node)
   }
   else {
-    j <- attributeDivision(X, Y, n=n)
-    node = decisionNode(
-      attribute=j$attribute,
-      values=j$values,
-      quantitative=j$quantitative
-      )
-    #xy = matrix(cbind(X, Y), ncol=ncol(X)+1)
-    xy = (cbind(X, Y))
-    sub = divideDataset(xy[order(xy[,node$attribute]),], indices=j$indices, attribute=node$attribute, quantitative=node$quantitative)
-    for (i in (1:length(sub))) {
-      #subi = matrix(sub[[i]], ncol=ncol(X)+1)
-      subi = sub[[i]]
-      subTree = decisionTree(subi[,-ncol(subi)], subi[,ncol(subi)], theta)
-      node$children[[i]] = subTree
+    j <- attributeDivision(X, Y, r, validAttributes, n=n)
+    if (is.null(j)) return(decisionNode(prediction = entropyY$majorityClass))
+    else {
+      node = decisionNode(
+        attribute=j$attribute,
+        values=j$values,
+        quantitative=j$quantitative
+        )
+      #xy = matrix(cbind(X, Y), ncol=ncol(X)+1)
+      xy = (cbind(X, Y))
+      sub = divideDataset(xy[order(xy[,node$attribute]),], indices=j$indices, attribute=node$attribute, quantitative=node$quantitative)
+      for (i in (1:length(sub))) {
+        #subi = matrix(sub[[i]], ncol=ncol(X)+1)
+        subi = sub[[i]]
+        subTree = decisionTree(subi[,-ncol(subi)], subi[,ncol(subi)], theta, j$validAttributes)
+        node$children[[i]] = subTree
+      }
+      return(node)
     }
-    return(node)
   }
 }
 
