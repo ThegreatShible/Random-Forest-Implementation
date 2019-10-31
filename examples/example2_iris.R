@@ -5,9 +5,18 @@ iris
 shuffled = iris[sample(nrow(iris)),]
 trainProportion = (60/100) * nrow(iris)
 train = shuffled[1:trainProportion,]
-test = shuffled[(trainProportion+1):nrow(shuffled),]
+extraTrain <- sample(1:300,  dim(train)[1], TRUE)
 
-tree = decisionTree(train[,-ncol(train)], train[,ncol(train)], 0.4)
+test = shuffled[(trainProportion+1):nrow(shuffled),]
+extraTest <- sample(1:300,  dim(test)[1], TRUE)
+
+Xtrain = train[,-ncol(train)]
+Xtrain["extra"] <- factor(extraTrain)
+Xtrain = Xtrain["extra"]
+Ytrain = train[,ncol(train)]
+tree = decisionTree(Xtrain, Ytrain, 0.4, 2)
+
+
 printTree(tree)
 rate=0
 for (i in (1:nrow(train))) {
@@ -16,7 +25,7 @@ for (i in (1:nrow(train))) {
   answer = line[,ncol(test)]
   if (answer != prediction) {
     print(line)
-    print(p)
+    print(prediction)
     print("-----")
     rate = rate + 1
   }
