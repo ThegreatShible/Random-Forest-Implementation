@@ -1,5 +1,6 @@
 data("iris")
-source("decisionTree.R")
+source("DecisionTree.R")
+source("RandomForest.R")
 iris
 
 shuffled = iris[sample(nrow(iris)),]
@@ -18,11 +19,11 @@ Xtest["Petal.Length.Int"] = as.factor(floor(Xtest[,"Petal.Length"]))
 #Xtrain["extra"] <- factor(extraTrain)
 #Xtrain = Xtrain["extra"]
 Ytrain = train[,ncol(train)]
-tree = decisionTree(Xtrain, Ytrain, 0.4, 2)
+tree = decisionTree(Xtrain, Ytrain, 0, 2)
 
 
-printTree(tree)
-rate=0
+#printTree(tree)
+rateTree=0
 for (i in (1:nrow(Xtest))) {
   line = Xtest[i,]
   prediction = decisionTree.predict(tree, line)
@@ -30,12 +31,31 @@ for (i in (1:nrow(Xtest))) {
   if (answer != prediction) {
     print(line)
     print(prediction)
+    print(answer)
     print("-----")
-    rate = rate + 1
+    rateTree = rateTree + 1
   }
 }
-rate = rate / nrow(test)
-print(rate)
+rateTree = rateTree / nrow(test)
+
+forest = trainRandomForest(Xtrain, Ytrain, 50, 0, 2)
+rateForest=0
+for (i in (1:nrow(Xtest))) {
+  line = Xtest[i,]
+  prediction = predictRandomForest(line, forest)
+  answer = test[i,][,ncol(test)]
+  if (answer != prediction) {
+    print(line)
+    print(prediction)
+    print(answer)
+    print("-----")
+    rateForest = rateForest + 1
+  }
+}
+rateForest = rateForest / nrow(test)
+
+print(rateTree)
+print(rateForest)
 
 # Attributes 3 and 4 seems to be sufficient to predict iris type
 # Let's plot them

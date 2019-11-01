@@ -242,26 +242,26 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
         removedAttributes <- c(removedAttributes, att)
         nbValidAttributes = nbValidAttributes - 1
         sampleVector = sampleVector[sampleVector != att]
-        next
       }
-      # Separation of values in different classes
-      separated = divideDataset(cbind(X, Y), classes, attribute=att, quantitative=FALSE)
-      
-      E=0
-      for (portion in separated) {
+      else {
+        nbValidSampledAttributes = nbValidSampledAttributes +1
         
-        if(nrow(portion) !=0)
-          E = E + (NROW(portion) / lenX) * (entropy(portion[,NCOL(portion)])$value)
+        # Separation of values in different classes
+        separated = divideDataset(cbind(X, Y), classes, attribute=att, quantitative=FALSE)
+        
+        E=0
+        for (portion in separated) {
+          
+          if(nrow(portion) !=0)
+            E = E + (NROW(portion) / lenX) * (entropy(portion[,NCOL(portion)])$value)
+        }
+        if (E < minE) {
+          minE = E
+          j$attribute = att
+          j$values = classes
+          j$quantitative=FALSE
+        }
       }
-      if (E < minE) {
-        minE = E
-        j$attribute = att
-        j$values = classes
-        j$quantitative=FALSE
-      }
-      
-      
-  
     }
     # QUANTITATIVE
     else {
@@ -271,6 +271,9 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
       
       # Every way to separate a dataset
       possibleSeparations = separate(orderedY, n=n)
+      
+      if (length(possibleSeparations) > 0) nbValidSampledAttributes = nbValidSampledAttributes +1
+      
       #if (length(possibleSeparations) == 0) {
       #  removedAttributes <- c(removedAttributes, att)
       #  nbValidAttributes = nbValidAttributes - 1
@@ -295,7 +298,6 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
         }
       }
     }
-    nbValidSampledAttributes = nbValidSampledAttributes +1
     #Remove sampled attribute to sample another one
     sampleVector = sampleVector[sampleVector != att]
   }
@@ -316,7 +318,7 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
 decisionTree <- function(X, Y, theta,r, n=2, validAttributes= 1:ncol(X)) {
   node = NULL
   entropyY = entropy(Y)
-  if (entropyY$value < theta) {
+  if (entropyY$value <= theta) {
     node = decisionNode(
       prediction=entropyY$majorityClass)
     return(node)
