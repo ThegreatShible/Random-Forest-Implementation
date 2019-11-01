@@ -36,13 +36,26 @@ entropy <- function(Y) {
 # Returns a vector list of size (length(j) + 1) containing
 # different subsets of X divided depending on their values
 # for the attribute
-divideDataset <- function(X, values=NULL, indices=NULL, attribute=1, quantitative=TRUE) {
+divideDataset <- function(X, values=NA, indices=NA, attribute=1, quantitative=TRUE) {
   if (is.null(dim(X))) {
     X = matrix(X, ncol = 1)
   }
   attr = X[,attribute]
   res = list()
-  if (!is.null(values)) {
+  if (all(!is.na(indices))) {
+    #res[[1]] = matrix(X[1:(indices[1]-1),], ncol=ncol(X))
+    res[[1]] = X[1:(indices[1]-1),]
+    lenIndices = length(indices)
+    if (lenIndices > 1) {
+      for (i in 2:lenIndices) {
+        #res[[i]] = matrix(X[indices[i-1]:(indices[i]-1),], ncol=ncol(X))
+        res[[i]] = X[indices[i-1]:(indices[i]-1),]
+      }
+    }
+    #res[[lenIndices+1]] = matrix(X[indices[lenIndices]:nrow(X),], ncol=ncol(X))
+    res[[lenIndices+1]] = X[indices[lenIndices]:nrow(X),]
+  }
+  else if (all(!is.na(values))) {
     lenValues = length(values)
     if (quantitative) {
       #res[[1]] = matrix(X[attr < values[1],], ncol=ncol(X))
@@ -62,19 +75,6 @@ divideDataset <- function(X, values=NULL, indices=NULL, attribute=1, quantitativ
         res[[i]] = X[values[i] == attr,]
       }
     }
-  }
-  else if (!is.null(indices)) {
-    #res[[1]] = matrix(X[1:(indices[1]-1),], ncol=ncol(X))
-    res[[1]] = X[1:(indices[1]-1),]
-    lenIndices = length(indices)
-    if (lenIndices > 1) {
-      for (i in 2:lenIndices) {
-        #res[[i]] = matrix(X[indices[i-1]:(indices[i]-1),], ncol=ncol(X))
-        res[[i]] = X[indices[i-1]:(indices[i]-1),]
-      }
-    }
-    #res[[lenIndices+1]] = matrix(X[indices[lenIndices]:nrow(X),], ncol=ncol(X))
-    res[[lenIndices+1]] = X[indices[lenIndices]:nrow(X),]
   }
   return(res)
 }
@@ -347,7 +347,7 @@ decisionTree <- function(X, Y, theta,r, n=2, validAttributes= 1:ncol(X)) {
 print.decisionTree <- function(t, useS4 = FALSE) {
   if (!is.na(t$attribute))
     print(paste("Attribute : ", t$attribute))
-  if (!is.na(t$values))
+  if (all(!is.na(t$values)))
     print(paste(c("Values : ", t$values)))
   len = length(t$children)
   if (len > 0)
