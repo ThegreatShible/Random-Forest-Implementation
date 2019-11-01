@@ -248,6 +248,8 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
         
         # Separation of values in different classes
         separated = divideDataset(cbind(X, Y), classes, attribute=att, quantitative=FALSE)
+        #indices = cumsum(lapply(separated, length)) + 1
+        #indices = indices[-length(indices)]
         
         E=0
         for (portion in separated) {
@@ -259,6 +261,7 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
           minE = E
           j$attribute = att
           j$values = classes
+          #j$indices = indices
           j$quantitative=FALSE
         }
       }
