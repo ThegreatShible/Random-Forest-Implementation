@@ -3,6 +3,11 @@ library(parallel)
 library(foreach)
 library(doParallel)
 
+
+#Trains a random forest algorithm on a dataset X with labels Y
+#nbTrees represents the number of decision trees
+#Theta is the maximum entropy of a leaf in the trees
+#r is the number of randomly selected variables in each node
 trainRandomForest <- function(X,Y, nbTrees, theta, r){
   require(parallel)
   require(foreach)
@@ -21,7 +26,8 @@ trainRandomForest <- function(X,Y, nbTrees, theta, r){
 }
 
 
-predictRandomForest = function(x, Trees) {
+#Predicts the class of x by the random forest model "trees"
+predictRandomForest = function(x, trees) {
   require(parallel)
   require(foreach)
   require(doParallel)

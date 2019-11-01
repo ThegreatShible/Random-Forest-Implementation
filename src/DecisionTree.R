@@ -271,11 +271,7 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
       
       # Every way to separate a dataset
       possibleSeparations = separate(orderedY, n=n)
-      #if (length(possibleSeparations) == 0) {
-      #  removedAttributes <- c(removedAttributes, att)
-      #  nbValidAttributes = nbValidAttributes - 1
-      #  next
-      #}
+
       for (sep in possibleSeparations) {
         E = 0
         for (portion in sep) {
@@ -377,12 +373,10 @@ printTree <- function(tree) {
     print(tree)
 }
 
-# Walah R c'est pas un langage.
+
+#Classify "x" with the decision tree "node"
 decisionTree.predict <- function(node, x) {
-  #tryCatch({
-    #pred <- node$prediction
-    #return (pred)
-  #}, error = function(cond){
+
     if(! is.null(node$prediction)) return(node$prediction)
     else {
       attr <- x[node$attribute]
@@ -403,8 +397,5 @@ decisionTree.predict <- function(node, x) {
         
       } 
     }
-    
-  #}
-    
-  #)
+
 }
