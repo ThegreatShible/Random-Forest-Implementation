@@ -323,20 +323,25 @@ decisionTree <- function(X, Y, theta,r, n=2, validAttributes= 1:ncol(X)) {
   }
   else {
     j <- attributeDivision(X, Y, r, validAttributes, n=n)
-    if (is.null(j)) return(decisionNode(prediction = entropyY$majorityClass))
+    if (is.null(j)) {
+      return(decisionNode(prediction = entropyY$majorityClass))
+    }
     else {
       node = decisionNode(
         attribute=j$attribute,
         values=j$values,
-        quantitative=j$quantitative
-        )
+        quantitative=j$quantitative,
+        prediction=entropyY$majorityClass
+      )
       #xy = matrix(cbind(X, Y), ncol=ncol(X)+1)
       xy = (cbind(X, Y))
       sub = divideDataset(xy[order(xy[,node$attribute]),], indices=j$indices, values=j$values, attribute=node$attribute, quantitative=node$quantitative)
       for (i in (1:length(sub))) {
         #subi = matrix(sub[[i]], ncol=ncol(X)+1)
         subi = sub[[i]]
-        if(nrow(subi) == 0) node$children[[i]] =decisionNode(prediction=entropyY$majorityClass)
+        if(nrow(subi) == 0) {
+          node$children[[i]] =decisionNode(prediction=entropyY$majorityClass)
+        }
         else {
           subTree = decisionTree(subi[,-ncol(subi)], subi[,ncol(subi)], theta, r, n, j$validAttributes)
           node$children[[i]] = subTree
@@ -381,9 +386,10 @@ printTree <- function(tree) {
 #Classify "x" with the decision tree "node"
 decisionTree.predict <- function(node, x) {
 
-    if(! is.null(node$prediction)) return(node$prediction)
+    #if(! is.null(node$prediction)) return(node$prediction)
+    if(length(node$children) == 0) return(node$prediction)
     else {
-      attr <- x[node$attribute]
+      attr <- x[,node$attribute]
       if(node$quantitative) {
         childIndex = 0
         for (c in 1:length(node$values)){
@@ -396,9 +402,14 @@ decisionTree.predict <- function(node, x) {
         return(decisionTree.predict(node$children[[childIndex]],x))
         
       }else{
-        
-        return(decisionTree.predict(node$children[[as.integer(attr)]], x)) 
-        
+        childIndex = which(node$values == attr)
+        if (length(childIndex) == 1) {
+          return(decisionTree.predict(node$children[[childIndex]], x))
+        }
+        else {
+          return(node$prediction)
+        }
+        #else return(decisionTree.predict(node$children[[as.integer(attr)]], x))
       } 
     }
 

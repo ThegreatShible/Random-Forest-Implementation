@@ -21,8 +21,7 @@ Xtest["Petal.Length.Int"] = as.factor(floor(Xtest[,"Petal.Length"]))
 Ytrain = train[,ncol(train)]
 tree = decisionTree(Xtrain, Ytrain, 0, 2)
 
-
-#printTree(tree)
+printTree(tree)
 rateTree=0
 for (i in (1:nrow(Xtest))) {
   line = Xtest[i,]
@@ -37,6 +36,7 @@ for (i in (1:nrow(Xtest))) {
   }
 }
 rateTree = rateTree / nrow(test)
+print(rateTree)
 
 forest = trainRandomForest(Xtrain, Ytrain, 50, 0, 2)
 rateForest=0
@@ -54,7 +54,6 @@ for (i in (1:nrow(Xtest))) {
 }
 rateForest = rateForest / nrow(test)
 
-print(rateTree)
 print(rateForest)
 
 # Attributes 3 and 4 seems to be sufficient to predict iris type
