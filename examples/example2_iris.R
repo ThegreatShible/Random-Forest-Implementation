@@ -12,6 +12,9 @@ test = shuffled[(trainProportion+1):nrow(shuffled),]
 
 Xtrain = train[,-ncol(train)]
 Xtrain["Petal.Length.Int"] = as.factor(floor(Xtrain[,"Petal.Length"]))
+
+Xtest = test[,-ncol(test)]
+Xtest["Petal.Length.Int"] = as.factor(floor(Xtest[,"Petal.Length"]))
 #Xtrain["extra"] <- factor(extraTrain)
 #Xtrain = Xtrain["extra"]
 Ytrain = train[,ncol(train)]
@@ -20,10 +23,10 @@ tree = decisionTree(Xtrain, Ytrain, 0.4, 2)
 
 printTree(tree)
 rate=0
-for (i in (1:nrow(train))) {
-  line = train[i,]
-  prediction = decisionTree.predict(tree, line[,-ncol(test)])
-  answer = line[,ncol(test)]
+for (i in (1:nrow(Xtest))) {
+  line = Xtest[i,]
+  prediction = decisionTree.predict(tree, line)
+  answer = test[i,][,ncol(test)]
   if (answer != prediction) {
     print(line)
     print(prediction)

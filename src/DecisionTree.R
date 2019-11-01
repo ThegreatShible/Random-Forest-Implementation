@@ -351,7 +351,7 @@ print.decisionTree <- function(t, useS4 = FALSE) {
   if (!is.na(t$attribute))
     print(paste("Attribute : ", t$attribute))
   if (!is.na(t$values))
-    print(paste("Values : ", t$values))
+    print(paste(c("Values : ", t$values)))
   len = length(t$children)
   if (len > 0)
     print(paste("Children : ", len))
@@ -379,10 +379,10 @@ printTree <- function(tree) {
 
 # Walah R c'est pas un langage.
 decisionTree.predict <- function(node, x) {
-  tryCatch({
-    pred <- node[[1]]$prediction
-    return (pred)
-  }, error = function(cond){
+  #tryCatch({
+    #pred <- node$prediction
+    #return (pred)
+  #}, error = function(cond){
     if(! is.null(node$prediction)) return(node$prediction)
     else {
       attr <- x[node$attribute]
@@ -399,12 +399,12 @@ decisionTree.predict <- function(node, x) {
         
       }else{
         
-        return(decisionTree.predict(node$children[as.integer(attr)], x)) 
+        return(decisionTree.predict(node$children[[as.integer(attr)]], x)) 
         
       } 
     }
     
-  }
+  #}
     
-  )
+  #)
 }
