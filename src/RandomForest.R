@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 source("DecisionTree.R")
 library(parallel)
 library(foreach)
