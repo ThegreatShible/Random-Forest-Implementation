@@ -43,36 +43,28 @@ divideDataset <- function(X, values=NA, indices=NA, attribute=1, quantitative=TR
   attr = X[,attribute]
   res = list()
   if (all(!is.na(indices))) {
-    #res[[1]] = matrix(X[1:(indices[1]-1),], ncol=ncol(X))
     res[[1]] = X[1:(indices[1]-1),]
     lenIndices = length(indices)
     if (lenIndices > 1) {
       for (i in 2:lenIndices) {
-        #res[[i]] = matrix(X[indices[i-1]:(indices[i]-1),], ncol=ncol(X))
         res[[i]] = X[indices[i-1]:(indices[i]-1),]
       }
     }
-    #res[[lenIndices+1]] = matrix(X[indices[lenIndices]:nrow(X),], ncol=ncol(X))
     res[[lenIndices+1]] = X[indices[lenIndices]:nrow(X),]
   }
   else if (all(!is.na(values))) {
     lenValues = length(values)
     if (quantitative) {
-      #res[[1]] = matrix(X[attr < values[1],], ncol=ncol(X))
-
       res[[1]] = X[attr < values[1],]
       if (lenValues > 1) {
         for (i in (2:lenValues)) {
-          #res[[i]] = matrix(X[values[i-1] <= attr & attr < values[i],], ncol=ncol(X))
           res[[i]] = X[values[i-1] <= attr & attr < values[i],]
         }
       }
-      #res[[lenValues+1]] = matrix(X[attr >= values[lenValues],], ncol=ncol(X))
       res[[lenValues+1]] = X[attr >= values[lenValues],]
     }
     else {
       for (i in 1:lenValues) {
-        #res[[i]] = matrix(X[values[i] == attr,], ncol=ncol(X))
         res[[i]] = X[values[i] == attr,]
       }
     }
@@ -196,8 +188,6 @@ partition <- function(collection){
       if (n<length(smaller)) {
         for (i in ((n+1):length(smaller)))
           res[[count]][[i]] = smaller[[i]]
-        #i = i + 1
-        #res[[count]][[i]] = smaller[[(n+1):length(smaller)]]
       }
       
     }
@@ -249,9 +239,7 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
         
         # Separation of values in different classes
         separated = divideDataset(cbind(X, Y), values=classes, attribute=att, quantitative=FALSE)
-        #indices = cumsum(lapply(separated, length)) + 1
-        #indices = indices[-length(indices)]
-        
+
         E=0
         for (portion in separated) {
           
@@ -262,7 +250,6 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
           minE = E
           j$attribute = att
           j$values = classes
-          #j$indices = indices
           j$quantitative=FALSE
         }
       }
@@ -286,16 +273,11 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
         if (E < minE) {
           
           # Recover the corresponding x values for the frontier
-          #indices = cumsum(lapply(sep[1:(n-1)], length))+1
-          #values = sort(XAtt)[indices]
-          
-
           values = XAtt[ind]
           
           minE = E
           j$attribute = att
           j$values = values
-          #j$indices=indices
           j$quantitative=TRUE
         }
       }
@@ -338,14 +320,11 @@ decisionTree <- function(X, Y, theta,r, n=2, validAttributes= 1:ncol(X)) {
         prediction=entropyY$majorityClass
       )
 
-      #xy = matrix(cbind(X, Y), ncol=ncol(X)+1)
       xy = (cbind(X, Y))
 
-      #sub = divideDataset(xy[order(xy[,node$attribute]),], indices=j$indices, values=j$values, attribute=node$attribute, quantitative=node$quantitative)
       sub = divideDataset(xy[order(xy[,node$attribute]),], values=j$values, attribute=node$attribute, quantitative=node$quantitative)
 
       for (i in (1:length(sub))) {
-        #subi = matrix(sub[[i]], ncol=ncol(X)+1)
         subi = sub[[i]]
         if(nrow(subi) == 0) {
           node$children[[i]] =decisionNode(prediction=entropyY$majorityClass)
@@ -393,33 +372,30 @@ printTree <- function(tree) {
 
 #Classify "x" with the decision tree "node"
 decisionTree.predict <- function(node, x) {
-
-    #if(! is.null(node$prediction)) return(node$prediction)
-    if(length(node$children) == 0) return(node$prediction)
-    else {
-      attr <- x[,node$attribute]
-      if(node$quantitative) {
-        childIndex = 0
-        for (c in 1:length(node$values)){
-          if (attr < node$values[c]){
-            childIndex = c
-            break
-          }
+  
+  if(length(node$children) == 0) return(node$prediction)
+  else {
+    attr <- x[,node$attribute]
+    if(node$quantitative) {
+      childIndex = 0
+      for (c in 1:length(node$values)){
+        if (attr < node$values[c]){
+          childIndex = c
+          break
         }
-        if(childIndex == 0) childIndex = length(node$children)
-        return(decisionTree.predict(node$children[[childIndex]],x))
-        
-      }else{
-        childIndex = which(node$values == attr)
-
-        if (length(childIndex) == 1) {
-          return(decisionTree.predict(node$children[[childIndex]], x))
-        }
-        else {
-          return(node$prediction)
-        }
-        #else return(decisionTree.predict(node$children[[as.integer(attr)]], x))
-      } 
-    }
-
+      }
+      if(childIndex == 0) childIndex = length(node$children)
+      return(decisionTree.predict(node$children[[childIndex]],x))
+      
+    }else{
+      childIndex = which(node$values == attr)
+      
+      if (length(childIndex) == 1) {
+        return(decisionTree.predict(node$children[[childIndex]], x))
+      }
+      else {
+        return(node$prediction)
+      }
+    } 
+  }
 }
