@@ -42,7 +42,7 @@ divideDataset <- function(X, values=NA, indices=NA, attribute=1, quantitative=TR
   }
   attr = X[,attribute]
   res = list()
-  if (all(!is.na(indices)) & quantitative) {
+  if (all(!is.na(indices))) {
     #res[[1]] = matrix(X[1:(indices[1]-1),], ncol=ncol(X))
     res[[1]] = X[1:(indices[1]-1),]
     lenIndices = length(indices)
@@ -59,6 +59,7 @@ divideDataset <- function(X, values=NA, indices=NA, attribute=1, quantitative=TR
     lenValues = length(values)
     if (quantitative) {
       #res[[1]] = matrix(X[attr < values[1],], ncol=ncol(X))
+
       res[[1]] = X[attr < values[1],]
       if (lenValues > 1) {
         for (i in (2:lenValues)) {
@@ -269,15 +270,15 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
     # QUANTITATIVE
     else {
       
-      # Y vector re-ordered according to X sorted by specific attribute
+      # Every way to separate a dataset
+      possibleSeparations = separations(sort(XAtt), n=n)
+
       orderedY = orderVectorByOther(Y, XAtt)
       
-      # Every way to separate a dataset
-      possibleSeparations = separate(orderedY, n=n)
-
       if (length(possibleSeparations) > 0) nbValidSampledAttributes = nbValidSampledAttributes +1
       
-      for (sep in possibleSeparations) {
+      for (ind in possibleSeparations) {
+        sep = divideDataset(orderedY, indices=ind)
         E = 0
         for (portion in sep) {
           E = E + (length(portion) / lenX) * entropy(portion)$value
@@ -285,13 +286,16 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
         if (E < minE) {
           
           # Recover the corresponding x values for the frontier
-          indices = cumsum(lapply(sep[1:(n-1)], length))+1
-          values = sort(XAtt)[indices]
+          #indices = cumsum(lapply(sep[1:(n-1)], length))+1
+          #values = sort(XAtt)[indices]
+          
+
+          values = XAtt[ind]
           
           minE = E
           j$attribute = att
           j$values = values
-          j$indices=indices
+          #j$indices=indices
           j$quantitative=TRUE
         }
       }
@@ -336,7 +340,9 @@ decisionTree <- function(X, Y, theta,r, n=2, validAttributes= 1:ncol(X)) {
 
       #xy = matrix(cbind(X, Y), ncol=ncol(X)+1)
       xy = (cbind(X, Y))
-      sub = divideDataset(xy[order(xy[,node$attribute]),], indices=j$indices, values=j$values, attribute=node$attribute, quantitative=node$quantitative)
+
+      #sub = divideDataset(xy[order(xy[,node$attribute]),], indices=j$indices, values=j$values, attribute=node$attribute, quantitative=node$quantitative)
+      sub = divideDataset(xy[order(xy[,node$attribute]),], values=j$values, attribute=node$attribute, quantitative=node$quantitative)
 
       for (i in (1:length(sub))) {
         #subi = matrix(sub[[i]], ncol=ncol(X)+1)
