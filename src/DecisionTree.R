@@ -165,7 +165,7 @@ is.qualitative <- function(X) {
   return(class(X) != "numeric" && class(X) != "integer")
 }
 
-attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
+attributeDivision <- function(X, Y, r, validAttributes) {
   lenX = nrow(X)
   minE = .Machine$double.xmax
   j = list(attribute=NA, values=NA, indices=NA, quantitative=NA, validAttributes = NA)
@@ -214,8 +214,7 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
     else {
       
       # Every way to separate a dataset
-      possibleSeparations = separations(sort(XAtt), n=n)
-
+      possibleSeparations = separations(sort(XAtt))
       orderedY = orderVectorByOther(Y, XAtt)
       
       if (length(possibleSeparations) > 0) nbValidSampledAttributes = nbValidSampledAttributes +1
@@ -255,7 +254,7 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
 }
 
 # Takes data matrix X as input and creates a DecisionTree based on it
-decisionTree <- function(X, Y, theta,r, n=2, validAttributes= 1:ncol(X)) {
+decisionTree <- function(X, Y, theta,r, validAttributes= 1:ncol(X)) {
   node = NULL
   entropyY = entropy(Y)
   if (entropyY$value <= theta) {
@@ -264,7 +263,7 @@ decisionTree <- function(X, Y, theta,r, n=2, validAttributes= 1:ncol(X)) {
     return(node)
   }
   else {
-    j <- attributeDivision(X, Y, r, validAttributes, n=n)
+    j <- attributeDivision(X, Y, r, validAttributes)
     if (is.null(j)) {
       return(decisionNode(prediction = entropyY$majorityClass))
     }
@@ -286,7 +285,7 @@ decisionTree <- function(X, Y, theta,r, n=2, validAttributes= 1:ncol(X)) {
           node$children[[i]] =decisionNode(prediction=entropyY$majorityClass)
         }
         else {
-          subTree = decisionTree(subi[,-ncol(subi)], subi[,ncol(subi)], theta, r, n, j$validAttributes)
+          subTree = decisionTree(subi[,-ncol(subi)], subi[,ncol(subi)], theta, r, j$validAttributes)
           node$children[[i]] = subTree
         }
       }
