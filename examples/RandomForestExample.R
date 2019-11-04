@@ -16,7 +16,7 @@ Ytrain = train[,ncol(train)]
 Xtest = test[,-ncol(test)]
 Xtest["extra"] <- factor(extraTest)
 Ytest <- test[,ncol(test)]
-model <- trainRandomForest(Xtrain, Ytrain, 200, 0.1, 2)
+model <- trainRandomForest(Xtrain, Ytrain, 500, 0.1, 2)
 acc = 0
 nrow = nrow(Xtest)
 for(i in 1:nrow){
