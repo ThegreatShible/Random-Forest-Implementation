@@ -168,7 +168,7 @@ is.qualitative <- function(X) {
 attributeDivision <- function(X, Y, r, validAttributes) {
   lenX = nrow(X)
   minE = .Machine$double.xmax
-  j = list(attribute=NA, values=NA, indices=NA, quantitative=NA, validAttributes = NA)
+  j = list(attribute=NA, values=NA, quantitative=NA, validAttributes = NA)
 
   nbValidSampledAttributes = 0
   nbValidAttributes = length(validAttributes)
