@@ -42,7 +42,7 @@ divideDataset <- function(X, values=NA, indices=NA, attribute=1, quantitative=TR
   }
   attr = X[,attribute]
   res = list()
-  if (all(!is.na(indices))) {
+  if (all(!is.na(indices)) & quantitative) {
     #res[[1]] = matrix(X[1:(indices[1]-1),], ncol=ncol(X))
     res[[1]] = X[1:(indices[1]-1),]
     lenIndices = length(indices)
@@ -236,7 +236,7 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
     # QUALITATIVE
     if (is.qualitative(XAtt)) {
       
-      classes = levels(as.factor(XAtt))
+      classes = c(levels(factor(XAtt)))
       if(length(classes) == 1) {
         #If there is no separation, remove the attribute from node and don't sample it.
         removedAttributes <- c(removedAttributes, att)
@@ -247,7 +247,7 @@ attributeDivision <- function(X, Y, r, validAttributes,  n=2) {
         nbValidSampledAttributes = nbValidSampledAttributes +1
         
         # Separation of values in different classes
-        separated = divideDataset(cbind(X, Y), classes, attribute=att, quantitative=FALSE)
+        separated = divideDataset(cbind(X, Y), values=classes, attribute=att, quantitative=FALSE)
         #indices = cumsum(lapply(separated, length)) + 1
         #indices = indices[-length(indices)]
         
@@ -333,9 +333,11 @@ decisionTree <- function(X, Y, theta,r, n=2, validAttributes= 1:ncol(X)) {
         quantitative=j$quantitative,
         prediction=entropyY$majorityClass
       )
+
       #xy = matrix(cbind(X, Y), ncol=ncol(X)+1)
       xy = (cbind(X, Y))
       sub = divideDataset(xy[order(xy[,node$attribute]),], indices=j$indices, values=j$values, attribute=node$attribute, quantitative=node$quantitative)
+
       for (i in (1:length(sub))) {
         #subi = matrix(sub[[i]], ncol=ncol(X)+1)
         subi = sub[[i]]
@@ -403,6 +405,7 @@ decisionTree.predict <- function(node, x) {
         
       }else{
         childIndex = which(node$values == attr)
+
         if (length(childIndex) == 1) {
           return(decisionTree.predict(node$children[[childIndex]], x))
         }

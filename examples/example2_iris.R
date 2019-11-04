@@ -54,6 +54,7 @@ for (i in (1:nrow(Xtest))) {
 }
 rateForest = rateForest / nrow(test)
 
+print(rateTree)
 print(rateForest)
 
 # Attributes 3 and 4 seems to be sufficient to predict iris type
