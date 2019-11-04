@@ -162,7 +162,7 @@ separate <- function(X, n=2) {
 }
 
 is.qualitative <- function(X) {
-  return(class(X) != "numeric" && class(X) != "integer")
+  return(class(X) == "factor")
 }
 
 attributeDivision <- function(X, Y, r, validAttributes) {
