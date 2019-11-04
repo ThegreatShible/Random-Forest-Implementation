@@ -161,50 +161,6 @@ separate <- function(X, n=2) {
   return(res)
 }
 
-
-# useless
-partition <- function(collection){
-  if (length(collection) == 1) {
-    return(list(list(collection)))
-  }
-  res = list()
-  count = 0
-  first = collection[1]
-  smalls = partition(collection[2:length(collection)])
-  for (smaller in smalls){
-    # insert `first` in each of the subpartition's subsets
-    for (n in (1:length(smaller))) {
-      count = count + 1
-      res[[count]] = list()
-      i=0
-      
-      if (n>1) {
-        for (i in (1:(n-1)))
-          res[[count]][[i]] = smaller[[i]]
-      }
-      
-      res[[count]][[n]] = c(first, smaller[[n]])
-      
-      if (n<length(smaller)) {
-        for (i in ((n+1):length(smaller)))
-          res[[count]][[i]] = smaller[[i]]
-      }
-      
-    }
-    # put `first` in its own subset 
-    count = count + 1
-    res[[count]] = smaller
-    res[[count]][[length(res[[count]]) + 1]] = first
-  }
-  return(res)
-}
-
-# useless as well
-splitClasses <- function(classes, n=2) {
-  p = partition(classes)
-  return(p[lapply(p, length) == n])
-}
-
 is.qualitative <- function(X) {
   return(class(X) != "numeric" && class(X) != "integer")
 }
